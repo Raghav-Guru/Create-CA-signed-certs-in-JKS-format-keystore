@@ -45,14 +45,12 @@ def keystore_create_jks(host):
 '''Function to convert JKS to PKCS12 fromat'''
 
 def convert_pkcs12(host):
-
     convert_cmd_pkcs12="keytool -importkeystore -destkeystore {0}.p12 -deststoretype PKCS12  -deststorepass {1} -destkeypass {1} -srcstoretype JKS  -srcalias {0}  -srckeystore {0}.jks -srcstorepass {1} -srckeypass {1}  -noprompt".format(host,password)
     os.popen(convert_cmd_pkcs12)
 
 '''Function to convert PKCS12 to PEM fromat'''
 
 def convert_pem(host):
-
   convert_cmd_pem="openssl pkcs12 -in {0}.p12 -out {0}.pem -nodes -password pass:{1}".format(host,password)
   os.popen(convert_cmd_pem)
 
@@ -60,21 +58,19 @@ def convert_pem(host):
 '''Function to convert PKCS12 to PEM fromat'''
 
 def convert_pkcs7(host):
-
     convert_cmd_pkcs7="openssl crl2pkcs7 -nocrl -certfile {0}.pem -out {0}.p7b".format(host)
     os.popen(convert_cmd_pkcs7)
 
 
 def main():
-
   keystore_create_rootca()
   for i in range(len(hostnames)):
     host = hostnames[i]
     keystore_create_jks(host)
-    if format_pkcs12:
+    if format_pkcs12 == 'True':
       convert_pkcs12(host)
 
-    if format_pkcs7:
+    if format_pkcs7 == 'True':
       print("====Converting to PKCS12 format====")
       convert_pkcs12(host)
       print("===Converting to PEM format===")
