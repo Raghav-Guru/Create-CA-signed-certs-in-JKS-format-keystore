@@ -1,7 +1,8 @@
 # Create-CA-signed-certs-in-JKS-format-keystore
 This script take the input from input.ini to create JKS keystore signed by rootCA
 
-To use the script: 
+To use the script:
+
 -->Clone :
 
     #git clone https://github.com/Raghav-Guru/Create-CA-signed-certs-in-JKS-format-keystore.git
