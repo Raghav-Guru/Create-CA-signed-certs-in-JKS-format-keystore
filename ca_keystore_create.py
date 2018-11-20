@@ -5,6 +5,7 @@ config = ConfigParser.ConfigParser()
 config.read("input.ini")
 password = config.get('ca','keystore_password')
 ca_dn = config.get('ca','ca_dn')
+host_dn = config.get('server_certs','cn_template')
 hostnames =  config.get('server_certs','hostnames').split(",")
 format_pkcs12=config.get('cert_format','pkcs12')
 format_pkcs7=config.get('cert_format','pkcs7')
@@ -32,9 +33,9 @@ def keystore_create_rootca():
 
 
 def keystore_create_jks(host):
-
+  host_dn_format=host_dn.format(host)
   print("====Creating keystore for the host : %s====" % (host))
-  cmd_cert="keytool -genkeypair -v -alias {0} -dname \"CN={0}, OU=Support, O=HWX, L=Durham, ST=North Carolina, C=US\" -keystore {0}.jks -keypass {1} -storepass {1} -keyalg RSA -keysize 2048 -validity 385".format(host,password)
+  cmd_cert="keytool -genkeypair -v -alias {0} -dname {2} -keystore {0}.jks -keypass {1} -storepass {1} -keyalg RSA -keysize 2048 -validity 385".format(host,password,host_dn_format)
   cmd_csr="keytool -certreq -v -alias {0} -keypass {1} -storepass {1} -keystore {0}.jks -file {0}.csr".format(host,password)
   cmd_crt="keytool -gencert -v -alias rootca -keypass {1} -storepass {1} -keystore rootca.jks -infile {0}.csr -outfile {0}.crt -ext KeyUsage:critical=\"digitalSignature,keyEncipherment\" -ext EKU=\"serverAuth,clientAuth\" -ext SAN=\"DNS:{0}\" -rfc".format(host,password)
   cmd_keystore_sign="keytool -import -v -alias {0} -file {0}.crt -keystore {0}.jks -storetype JKS -storepass {1}".format(host,password)
