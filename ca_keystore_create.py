@@ -75,7 +75,7 @@ def main():
       convert_pkcs12(host)
       print("===Converting to PEM format===")
       convert_pem(host)
-      print("===Converting to PEM format===")
+      print("===Converting to PKCS7 format===")
       convert_pkcs7(host)
 
 main()
