@@ -25,12 +25,14 @@ def keystore_create_rootca():
   print("====Creating RootCA with DN: %s===="%(ca_dn))
   rootca_cmd_truststore = "keytool -import -v -alias rootca -file rootca.crt -keystore rootca-truststore.jks -storetype JKS -storepass {0} -noprompt".format(
     password)
+  export_ca="keytool -export -v -alias rootca -file rootca.crt -keypass {0} -storepass {0} -keystore rootca.jks -rfc".format(password)
   os.popen(genkey_cmd)
+  os.popen(export_ca)
   os.popen(rootca_cmd_truststore)
 
+
 def keystore_create_jks(host):
-  export_ca="keytool -export -v -alias rootca -file rootca.crt -keypass {0} -storepass {0} -keystore rootca.jks -rfc".format(password)
-  os.popen(export_ca)
+
   print("====Creating keystore for the host : %s====" % (host))
   cmd_cert="keytool -genkeypair -v -alias {0} -dname \"CN={0}, OU=Support, O=HWX, L=Durham, ST=North Carolina, C=US\" -keystore {0}.jks -keypass {1} -storepass {1} -keyalg RSA -keysize 2048 -validity 385".format(host,password)
   cmd_csr="keytool -certreq -v -alias {0} -keypass {1} -storepass {1} -keystore {0}.jks -file {0}.csr".format(host,password)
