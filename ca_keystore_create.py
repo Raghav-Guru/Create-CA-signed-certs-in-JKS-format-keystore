@@ -3,8 +3,6 @@ import os
 
 config = ConfigParser.ConfigParser()
 config.read("input.ini")
-
-
 password = config.get('ca','keystore_password')
 ca_dn = config.get('ca','ca_dn')
 hostnames =  config.get('server_certs','hostnames').split(",")
@@ -12,12 +10,12 @@ format_pkcs12=config.get('cert_format','pkcs12')
 format_pkcs7=config.get('cert_format','pkcs7')
 
 
-'''def java(classname, args, classpath, jvm_opts_list, logdir=None):
+def java():
   java_home = os.environ.get("JAVA_HOME", None)
   if java_home:
-    prg = os.path.join(java_home, "bin", "java")
+    keytool_cmd = os.path.join(java_home, "bin", "keytool")
   else:
-    prg = which("java")'''
+    keytool_cmd = which("keytool")
 
 
 '''Function to create RootCA and CA signed JKS keystore'''
@@ -25,7 +23,10 @@ format_pkcs7=config.get('cert_format','pkcs7')
 def keystore_create_rootca():
   genkey_cmd="keytool -genkeypair -v -alias rootca -dname {0} -keystore rootca.jks -keypass {1} -storepass {1} -keyalg RSA -keysize 4096 -ext KeyUsage:critical=\"keyCertSign\" -ext BasicConstraints:critical=\"ca:true\" -validity 9999".format(ca_dn, password)
   print("====Creating RootCA with DN: %s===="%(ca_dn))
+  rootca_cmd_truststore = "keytool -import -v -alias rootca -file rootca.crt -keystore rootca-truststore.jks -storetype JKS -storepass {0} -noprompt".format(
+    password)
   os.popen(genkey_cmd)
+  os.popen(rootca_cmd_truststore)
 
 def keystore_create_jks(host):
   export_ca="keytool -export -v -alias rootca -file rootca.crt -keypass {0} -storepass {0} -keystore rootca.jks -rfc".format(password)
@@ -36,6 +37,7 @@ def keystore_create_jks(host):
   cmd_crt="keytool -gencert -v -alias rootca -keypass {1} -storepass {1} -keystore rootca.jks -infile {0}.csr -outfile {0}.crt -ext KeyUsage:critical=\"digitalSignature,keyEncipherment\" -ext EKU=\"serverAuth,clientAuth\" -ext SAN=\"DNS:{0}\" -rfc".format(host,password)
   cmd_keystore_sign="keytool -import -v -alias {0} -file {0}.crt -keystore {0}.jks -storetype JKS -storepass {1}".format(host,password)
   cmd_trust="keytool -import -v -alias rootca -file rootca.crt -keystore {0}.jks -storetype JKS -storepass {1} -noprompt".format(host,password)
+
   os.popen(cmd_cert)
   os.popen(cmd_csr)
   os.popen(cmd_crt)
@@ -52,7 +54,9 @@ def convert_pkcs12(host):
 
 def convert_pem(host):
   convert_cmd_pem="openssl pkcs12 -in {0}.p12 -out {0}.pem -nodes -password pass:{1}".format(host,password)
+  convert_cmd_key = "openssl pkcs12 -in {0}.p12 -nocerts -out {0}.key  -password pass:{1} -passout pass:{1}".format(host, password)
   os.popen(convert_cmd_pem)
+  os.popen(convert_cmd_key)
 
 
 '''Function to convert PKCS12 to PEM fromat'''
