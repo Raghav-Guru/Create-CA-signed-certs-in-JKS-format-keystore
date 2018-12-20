@@ -9,8 +9,9 @@ To use the script:
     #cd Create-CA-signed-certs-in-JKS-format-keystore
 
 -->Modify the input.ini as per the requirement.
-#vi input.ini
-[..]
+
+    #vi input.ini
+    [..]
 
 -->Set the keytool path based on your environment: 
 
